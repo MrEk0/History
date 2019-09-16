@@ -5,24 +5,35 @@ using UnityEngine;
 public class Player : MonoBehaviour
 {
     [SerializeField] float speed = 5f;
+    [SerializeField] float jumpSpeed = 5f;
+    [SerializeField] LayerMask layerMask;
 
     private Rigidbody2D rb;
     private SpriteRenderer sr;
     private PlayerInput input;
     private float xVelocity = 0f;
-    private float yVelocity = -9.81f;
+    private float yVelocity = 0f;
+    //private float gravVelocity = -9.81f;
     private float inputX = 0f;
-    private float inputY = 0f;
 
-    private float rayLength = 0.1f;
+    private float inputY = 0f;
+    private bool isJumping = false;
+    private float jumpDuration = 0f;
+    private float maxJumpTime = 0.3f;
+
+    private float rayLength = 0.01f;
+    private float offsetY = 0.005f;
+    private float offsetX = 0.05f;
     private float width;
+    private float height;
 
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
         sr = GetComponent<SpriteRenderer>();
 
-        width = GetComponent<Collider2D>().bounds.extents.x + 0.01f;
+        width = GetComponent<Collider2D>().bounds.extents.x;
+        height = GetComponent<Collider2D>().bounds.extents.y + 0.01f;
     }
 
     // Update is called once per frame
@@ -31,17 +42,27 @@ public class Player : MonoBehaviour
         inputX = Input.GetAxis("Horizontal");
         inputY = Input.GetAxis("Vertical");
 
-        if (inputX > 0)
-        {
-            sr.flipX = false;
-        }
-        else if (inputX < 0)
-        {
-            sr.flipX = true;
-        }
+        FlipPlayer();
+
+        JumpBehaviour();
+
     }
 
     private void FixedUpdate()
+    {
+        Movement();
+        JumpMovement();
+    }
+
+    private void JumpMovement()
+    {
+        if (isJumping && jumpDuration < maxJumpTime)
+        {
+            rb.velocity = new Vector2(xVelocity, jumpSpeed);
+        }
+    }
+
+    private void Movement()
     {
         if (inputX == 0)
         {
@@ -52,18 +73,59 @@ public class Player : MonoBehaviour
             xVelocity = inputX * speed;
         }
 
-        rb.velocity = new Vector2(xVelocity, yVelocity);
+        rb.velocity = new Vector2(xVelocity, rb.velocity.y);
+    }
+
+    private void JumpBehaviour()
+    {
+        if (IsOnTheGround() && isJumping == false)
+        {
+            if (inputY > 0f)
+            {
+                isJumping = true;
+            }
+        }
+
+        if (isJumping && inputY > 0f)
+        {
+            jumpDuration += Time.deltaTime;
+            if (jumpDuration > maxJumpTime)
+            {
+                inputY = 0f;
+            }
+        }
+        else
+        {
+            jumpDuration = 0f;
+            isJumping = false;
+        }
+    }
+
+    private void FlipPlayer()
+    {
+        if (inputX > 0f)
+        {
+            sr.flipX = false;
+        }
+        else if (inputX < 0f)
+        {
+            sr.flipX = true;
+        }
     }
 
     private bool IsOnTheGround()
     {
-        bool rightFoot = Physics2D.Raycast(new Vector2(transform.position.x + width, transform.position.y), Vector2.down, rayLength);
-        Debug.DrawRay(new Vector2(transform.position.x + width, transform.position.y), Vector2.down, Color.green, rayLength);
+        bool rightFoot = Physics2D.Raycast(new Vector2((transform.position.x + width-offsetX), transform.position.y-offsetY),
+            Vector2.down, rayLength, layerMask);
+        Debug.DrawRay(new Vector2((transform.position.x + width-offsetX), transform.position.y-offsetY),
+            Vector2.down, Color.green, rayLength);
 
-        bool leftFoot = Physics2D.Raycast(new Vector2(transform.position.x - width, transform.position.y), Vector2.down, rayLength);
-        Debug.DrawRay(new Vector2(transform.position.x - width, transform.position.y), Vector2.down, Color.green, rayLength);
+        bool leftFoot = Physics2D.Raycast(new Vector2((transform.position.x - width), transform.position.y - offsetY),
+            Vector2.down, rayLength, layerMask);
+        Debug.DrawRay(new Vector2((transform.position.x - width), transform.position.y-offsetY),
+            Vector2.down, Color.green, rayLength);
 
-        if (rightFoot && leftFoot)
+        if (rightFoot || leftFoot)
         {
             return true;
         }
