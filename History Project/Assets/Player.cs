@@ -52,6 +52,11 @@ public class Player : MonoBehaviour
     {
         Movement();
         JumpMovement();
+
+        //if (true)
+        //{
+        //    BlockBehaviour();
+        //}
     }
 
     private void JumpMovement()
@@ -132,6 +137,35 @@ public class Player : MonoBehaviour
         else
         {
             return false;
+        }
+    }
+
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        if(collision.gameObject.CompareTag("Block"))
+        {
+            Debug.Log("Block touch");
+            Rigidbody2D rb = collision.gameObject.GetComponent<Rigidbody2D>();
+
+            //rb.AddForce(Vector2.left * 100);
+            BlockBehaviour(rb);
+        }
+    }
+
+    //block component
+    private void BlockBehaviour(Rigidbody2D rigidbody)
+    {
+        RaycastHit2D rightSide = Physics2D.Raycast(rigidbody.transform.position, Vector2.right, 1);
+        RaycastHit2D leftSide = Physics2D.Raycast(rigidbody.transform.position, Vector2.left, 1);
+
+        if (rightSide.collider.CompareTag("Player"))
+        {
+            Debug.Log("player from the right");
+            rigidbody.AddForce(Vector2.left * 100);
+        }
+        else if(leftSide.collider.CompareTag("Player"))
+        {
+            rigidbody.AddForce(Vector2.right * 100);
         }
     }
 }
