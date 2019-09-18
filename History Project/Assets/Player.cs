@@ -7,33 +7,57 @@ public class Player : MonoBehaviour
     [SerializeField] float speed = 5f;
     [SerializeField] float jumpSpeed = 5f;
     [SerializeField] LayerMask layerMask;
+    [SerializeField] float climbSpeed=3f;
+    [SerializeField] float crounchSpeed = 3f;
+    //[SerializeField] float rayDistance;
+    //[SerializeField] LayerMask boxMask;
 
     private Rigidbody2D rb;
     private SpriteRenderer sr;
+    private BoxCollider2D collider;
     private PlayerInput input;
     private float xVelocity = 0f;
     private float yVelocity = 0f;
-    //private float gravVelocity = -9.81f;
     private float inputX = 0f;
 
+    //jump
     private float inputY = 0f;
     private bool isJumping = false;
     private float jumpDuration = 0f;
     private float maxJumpTime = 0.3f;
 
-    private float rayLength = 0.01f;
-    private float offsetY = 0.005f;
+    //raycast
+    private float rayLength = 0.1f;
+    public float headOffset = 0.03f;
+    private float offsetY = -0.01f;
     private float offsetX = 0.05f;
     private float width;
     private float height;
 
+    //crounch
+    private Vector2 crounchSizeCollider;
+    private Vector2 startScale;
+    private Vector2 crounchScale;
+    private Color crounchColor = Color.red;
+    private Color startColor;
+    private float startSpeed;
+    private Vector2 startCollider;
+    private bool isCrounch = false;
+
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
+        collider = GetComponent<BoxCollider2D>();
+        width = GetComponent<Collider2D>().bounds.extents.x;
+        height = GetComponent<BoxCollider2D>().size.y;
         sr = GetComponent<SpriteRenderer>();
 
-        width = GetComponent<Collider2D>().bounds.extents.x;
-        height = GetComponent<Collider2D>().bounds.extents.y + 0.01f;
+        crounchSizeCollider = new Vector2(collider.size.x, collider.size.y / 2);
+        startSpeed = speed;
+        startColor = GetComponent<SpriteRenderer>().color;
+        startScale = transform.localScale;
+        crounchScale = new Vector2(transform.localScale.x, transform.localScale.y / 2);
+        startCollider = collider.size;
     }
 
     // Update is called once per frame
@@ -42,21 +66,16 @@ public class Player : MonoBehaviour
         inputX = Input.GetAxis("Horizontal");
         inputY = Input.GetAxis("Vertical");
 
-        FlipPlayer();
-
         JumpBehaviour();
-
+        Crounch();
     }
 
     private void FixedUpdate()
     {
         Movement();
         JumpMovement();
-
-        //if (true)
-        //{
-        //    BlockBehaviour();
-        //}
+        FlipPlayer();
+        ClimbRope();
     }
 
     private void JumpMovement()
@@ -108,26 +127,23 @@ public class Player : MonoBehaviour
 
     private void FlipPlayer()
     {
-        if (inputX > 0f)
+        bool isMoving = Mathf.Abs(rb.velocity.x) > Mathf.Epsilon;
+        if (isMoving)
         {
-            sr.flipX = false;
-        }
-        else if (inputX < 0f)
-        {
-            sr.flipX = true;
+            transform.localScale = new Vector2(Mathf.Sign(rb.velocity.x), 1f);
         }
     }
 
     private bool IsOnTheGround()
     {
-        bool rightFoot = Physics2D.Raycast(new Vector2((transform.position.x + width-offsetX), transform.position.y-offsetY),
+        bool rightFoot = Physics2D.Raycast(new Vector2((transform.position.x + width - offsetX), transform.position.y - offsetY),
             Vector2.down, rayLength, layerMask);
-        Debug.DrawRay(new Vector2((transform.position.x + width-offsetX), transform.position.y-offsetY),
+        Debug.DrawRay(new Vector2((transform.position.x + width - offsetX), transform.position.y - offsetY),
             Vector2.down, Color.green, rayLength);
 
-        bool leftFoot = Physics2D.Raycast(new Vector2((transform.position.x - width), transform.position.y - offsetY),
+        bool leftFoot = Physics2D.Raycast(new Vector2((transform.position.x - width+offsetX), transform.position.y - offsetY),
             Vector2.down, rayLength, layerMask);
-        Debug.DrawRay(new Vector2((transform.position.x - width), transform.position.y-offsetY),
+        Debug.DrawRay(new Vector2((transform.position.x - width+offsetX), transform.position.y - offsetY),
             Vector2.down, Color.green, rayLength);
 
         if (rightFoot || leftFoot)
@@ -140,32 +156,42 @@ public class Player : MonoBehaviour
         }
     }
 
-    private void OnCollisionEnter2D(Collision2D collision)
+    private void ClimbRope()
     {
-        if(collision.gameObject.CompareTag("Block"))
+        if (!collider.IsTouchingLayers(LayerMask.GetMask("Climb")))
         {
-            Debug.Log("Block touch");
-            Rigidbody2D rb = collision.gameObject.GetComponent<Rigidbody2D>();
-
-            //rb.AddForce(Vector2.left * 100);
-            BlockBehaviour(rb);
+            rb.gravityScale = 1;
+            isCrounch = false;
+            return;
         }
+
+        isCrounch = true; ;
+        rb.gravityScale = 0;
+        Vector2 climbVelocity = new Vector2(rb.velocity.x, climbSpeed * inputY);
+        rb.velocity = climbVelocity;
     }
 
-    //block component
-    private void BlockBehaviour(Rigidbody2D rigidbody)
+    private void Crounch()
     {
-        RaycastHit2D rightSide = Physics2D.Raycast(rigidbody.transform.position, Vector2.right, 1);
-        RaycastHit2D leftSide = Physics2D.Raycast(rigidbody.transform.position, Vector2.left, 1);
+        RaycastHit2D headhit = Physics2D.Raycast(new Vector2(transform.position.x, transform.position.y + height/2 + headOffset),
+            Vector2.up, 1.3f, layerMask);
+        Debug.DrawRay(new Vector2(transform.position.x, transform.position.y + height/2 + headOffset), Vector2.up, Color.red, 1.3f);
+        Debug.Log(headhit.collider);
 
-        if (rightSide.collider.CompareTag("Player"))
+        if (Input.GetKeyDown(KeyCode.R) && !isCrounch)
         {
-            Debug.Log("player from the right");
-            rigidbody.AddForce(Vector2.left * 100);
+            collider.size = crounchSizeCollider;
+            sr.color = crounchColor;
+            //transform.localScale = crounchScale;
+            speed = crounchSpeed;
         }
-        else if(leftSide.collider.CompareTag("Player"))
+
+        if (Input.GetKeyUp(KeyCode.R) && headhit.collider==null)
         {
-            rigidbody.AddForce(Vector2.right * 100);
+            Debug.Log("back");
+            speed = startSpeed;
+            collider.size = startCollider;
+            sr.color = startColor;
         }
     }
 }
