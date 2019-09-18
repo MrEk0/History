@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 2317907576035686364}
   - component: {fileID: 2317907576035686362}
   - component: {fileID: 2317907576035686363}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Rope
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -130,7 +130,7 @@ GameObject:
   - component: {fileID: 2317907576529049706}
   - component: {fileID: 2317907576529049708}
   - component: {fileID: 2317907576529049707}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Hook
   m_TagString: Untagged
   m_Icon: {fileID: 0}
