@@ -9,6 +9,7 @@ public class Player : MonoBehaviour
     [SerializeField] LayerMask layerMask;
     [SerializeField] float climbSpeed=3f;
     [SerializeField] float crounchSpeed = 3f;
+    [SerializeField] float throwForce = 200f;
     //[SerializeField] float rayDistance;
     //[SerializeField] LayerMask boxMask;
 
@@ -69,6 +70,7 @@ public class Player : MonoBehaviour
 
         JumpBehaviour();
         Crounch();
+        ThrowBall();
     }
 
     private void FixedUpdate()
@@ -193,6 +195,24 @@ public class Player : MonoBehaviour
             speed = startSpeed;
             collider.size = startCollider;
             sr.color = startColor;
+        }
+    }
+
+    private void ThrowBall()
+    {
+        if (Input.GetMouseButtonDown(1))
+        {
+            GameObject ball = GetComponentInChildren<Ball>().gameObject;
+
+            if (ball != null)
+            {
+                ball.AddComponent<Rigidbody2D>();
+                ball.transform.parent = null;
+                ball.GetComponent<CircleCollider2D>().isTrigger = false;
+                Physics2D.IgnoreLayerCollision(LayerMask.NameToLayer("Player"), LayerMask.NameToLayer("Ball"), true);
+                ball.GetComponent<Rigidbody2D>().AddForce(Vector2.right*transform.localScale.x * throwForce);
+                Destroy(ball, 2f);
+            }
         }
     }
 }
