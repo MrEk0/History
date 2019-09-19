@@ -4,6 +4,14 @@ using UnityEngine;
 
 public class PitOfDeath : MonoBehaviour
 {
+    [SerializeField] GameObject gameOverPanel;
+
+    Canvas canvas;
+
+    private void Awake()
+    {
+        canvas = FindObjectOfType<Canvas>();
+    }
     private void OnTriggerEnter2D(Collider2D collision)
     {
         if(collision.gameObject.layer==LayerMask.NameToLayer("Player"))
@@ -15,6 +23,7 @@ public class PitOfDeath : MonoBehaviour
     private void Death()
     {
         //show game over window
+        Instantiate(gameOverPanel, canvas.transform);
         Time.timeScale = 0f;
     }
 }
