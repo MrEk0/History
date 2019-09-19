@@ -10,8 +10,6 @@ public class Player : MonoBehaviour
     [SerializeField] float climbSpeed=3f;
     [SerializeField] float crounchSpeed = 3f;
     [SerializeField] float throwForce = 200f;
-    //[SerializeField] float rayDistance;
-    //[SerializeField] LayerMask boxMask;
 
     private Rigidbody2D rb;
     private SpriteRenderer sr;
@@ -38,8 +36,6 @@ public class Player : MonoBehaviour
     //crounch
     private Vector2 crounchSizeCollider;
     private Vector2 startCollider;
-    //private Vector2 startScale;
-    //private Vector2 crounchScale;
     private Color crounchColor = Color.red;
     private Color startColor;
     private bool isCrounch = false;
@@ -57,8 +53,6 @@ public class Player : MonoBehaviour
         crounchSizeCollider = new Vector2(collider.size.x, collider.size.y / 2);
         startSpeed = speed;
         startColor = GetComponent<SpriteRenderer>().color;
-        //startScale = transform.localScale;
-        //crounchScale = new Vector2(transform.localScale.x, transform.localScale.y / 2);
         startCollider = collider.size;
     }
 
@@ -180,13 +174,11 @@ public class Player : MonoBehaviour
             Vector2.up, crounchRayLength, layerMask);
         Debug.DrawRay(new Vector2(transform.position.x, transform.position.y + height/2 + headOffset), 
             Vector2.up, Color.red, crounchRayLength);
-        //Debug.Log(headhit.collider);
 
         if (Input.GetKeyDown(KeyCode.R) && !isCrounch)
         {
             collider.size = crounchSizeCollider;
             sr.color = crounchColor;
-            //transform.localScale = crounchScale;
             speed = crounchSpeed;
         }
 
@@ -209,10 +201,17 @@ public class Player : MonoBehaviour
                 ball.AddComponent<Rigidbody2D>();
                 ball.transform.parent = null;
                 ball.GetComponent<CircleCollider2D>().isTrigger = false;
-                Physics2D.IgnoreLayerCollision(LayerMask.NameToLayer("Player"), LayerMask.NameToLayer("Ball"), true);
-                ball.GetComponent<Rigidbody2D>().AddForce(Vector2.right*transform.localScale.x * throwForce);
+                StartCoroutine(AddBallForce(ball));
                 Destroy(ball, 2f);
             }
         }
+    }
+
+    private IEnumerator AddBallForce(GameObject ball)
+    {
+        Physics2D.IgnoreLayerCollision(LayerMask.NameToLayer("Player"), LayerMask.NameToLayer("Ball"), true);
+        ball.GetComponent<Rigidbody2D>().AddForce(Vector2.right * transform.localScale.x * throwForce);
+        yield return new WaitForSeconds(2f);
+        Physics2D.IgnoreLayerCollision(LayerMask.NameToLayer("Player"), LayerMask.NameToLayer("Ball"), false);
     }
 }

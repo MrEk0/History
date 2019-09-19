@@ -34,10 +34,10 @@ RectTransform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -26.040009, y: 0}
-  m_SizeDelta: {x: -432.87, y: -214.2}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: -26.04004, y: 0}
+  m_SizeDelta: {x: 295.13, y: 195.8}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &462925982878944186
 CanvasRenderer:
@@ -60,7 +60,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 0.7137255}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -322,8 +322,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 13.9, y: 27.3}
-  m_SizeDelta: {x: 240.66, y: 101.4}
+  m_AnchoredPosition: {x: 5.1, y: 22.9}
+  m_SizeDelta: {x: 240.66, y: 127.75}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &462925984687229792
 CanvasRenderer:
@@ -370,4 +370,6 @@ MonoBehaviour:
 
     W, S - up and down movement
 
-    A, D - left right movement'
+    A, D - left right movement
+
+    Right Mouse - throw a ball'

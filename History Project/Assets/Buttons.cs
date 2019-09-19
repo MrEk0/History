@@ -8,7 +8,6 @@ public class Buttons : MonoBehaviour
     [SerializeField] GameObject startPanel;
 
     Canvas canvas;
-
     private void Awake()
     {
         canvas = FindObjectOfType<Canvas>();
@@ -17,13 +16,13 @@ public class Buttons : MonoBehaviour
     private void Start()
     {
         Instantiate(startPanel, canvas.transform);
+        Time.timeScale = 1;
+        Physics2D.IgnoreLayerCollision(LayerMask.NameToLayer("Player"), LayerMask.NameToLayer("Ball"), false);
     }
 
     public void RestartButton()
     {
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
-        Instantiate(startPanel, canvas.transform);
-        Time.timeScale = 1;
         Physics2D.IgnoreLayerCollision(LayerMask.NameToLayer("Player"), LayerMask.NameToLayer("Ball"), false);
     }
 
