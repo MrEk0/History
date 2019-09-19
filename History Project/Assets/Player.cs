@@ -28,7 +28,7 @@ public class Player : MonoBehaviour
 
     //raycast
     private float rayLength = 0.1f;
-    public float headOffset = 0.03f;
+    private float headOffset = 0.03f;
     private float offsetY = -0.01f;
     private float offsetX = 0.05f;
     private float width;
@@ -36,13 +36,14 @@ public class Player : MonoBehaviour
 
     //crounch
     private Vector2 crounchSizeCollider;
-    private Vector2 startScale;
-    private Vector2 crounchScale;
+    private Vector2 startCollider;
+    //private Vector2 startScale;
+    //private Vector2 crounchScale;
     private Color crounchColor = Color.red;
     private Color startColor;
-    private float startSpeed;
-    private Vector2 startCollider;
     private bool isCrounch = false;
+    private float startSpeed;
+    private float crounchRayLength = 1.3f;
 
     private void Awake()
     {
@@ -55,8 +56,8 @@ public class Player : MonoBehaviour
         crounchSizeCollider = new Vector2(collider.size.x, collider.size.y / 2);
         startSpeed = speed;
         startColor = GetComponent<SpriteRenderer>().color;
-        startScale = transform.localScale;
-        crounchScale = new Vector2(transform.localScale.x, transform.localScale.y / 2);
+        //startScale = transform.localScale;
+        //crounchScale = new Vector2(transform.localScale.x, transform.localScale.y / 2);
         startCollider = collider.size;
     }
 
@@ -174,9 +175,10 @@ public class Player : MonoBehaviour
     private void Crounch()
     {
         RaycastHit2D headhit = Physics2D.Raycast(new Vector2(transform.position.x, transform.position.y + height/2 + headOffset),
-            Vector2.up, 1.3f, layerMask);
-        Debug.DrawRay(new Vector2(transform.position.x, transform.position.y + height/2 + headOffset), Vector2.up, Color.red, 1.3f);
-        Debug.Log(headhit.collider);
+            Vector2.up, crounchRayLength, layerMask);
+        Debug.DrawRay(new Vector2(transform.position.x, transform.position.y + height/2 + headOffset), 
+            Vector2.up, Color.red, crounchRayLength);
+        //Debug.Log(headhit.collider);
 
         if (Input.GetKeyDown(KeyCode.R) && !isCrounch)
         {
@@ -188,7 +190,6 @@ public class Player : MonoBehaviour
 
         if (Input.GetKeyUp(KeyCode.R) && headhit.collider==null)
         {
-            Debug.Log("back");
             speed = startSpeed;
             collider.size = startCollider;
             sr.color = startColor;
